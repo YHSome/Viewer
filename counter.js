@@ -42,7 +42,9 @@ var Viewer = Viewer || {};
     Viewer.getVisitCount = function () {
         return call({ action: 'get', tag: TAG }).then(function (raw) {
             console.log('[counter] GET 原始返回:', raw);
-            var v = Array.isArray(raw) && raw[0] === 'VALUE' ? raw[2] : raw;
+            var v = raw;
+            if (Array.isArray(raw) && raw[0] === 'VALUE') { v = raw[2]; }
+            else if (typeof raw === 'object' && raw !== null && raw[TAG] !== undefined) { v = raw[TAG]; }
             console.log('[counter] 提取值:', JSON.stringify(v));
             var oldNum = parseInt(v, 10);
             console.log('[counter] parseInt 结果:', oldNum, 'isNaN:', isNaN(oldNum));
