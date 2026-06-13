@@ -83,8 +83,8 @@
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 24px;
-            backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
             animation: fadeUp 1.5s ease-out;
         }
@@ -244,10 +244,16 @@
     </script>
     <script src="counter.js"></script>
     <script>
-        // 调用 counter.js 提供的 getVisitCount()，将返回的数字填入页面
+        console.log('[Viewer] counter.js 已加载，getVisitCount 类型:', typeof getVisitCount);
         getVisitCount()
-            .then(n => { document.getElementById('counter').textContent = n; })
-            .catch(() => { document.getElementById('counter').textContent = '—'; });
+            .then(n => {
+                console.log('[Viewer] 获取计数成功:', n);
+                document.getElementById('counter').textContent = n;
+            })
+            .catch(err => {
+                console.error('[Viewer] 获取计数失败:', err);
+                document.getElementById('counter').textContent = '—';
+            });
     </script>
 
 </body>
