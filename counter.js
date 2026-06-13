@@ -24,11 +24,6 @@ var Viewer = Viewer || {};
     var SECRET = 'b3280975';
     var TAG    = 'watch';
 
-    /**
-     * 调用 TinyWebDB API
-     * @param {Object} params - API 参数（自动拼入 user 和 secret）
-     * @returns {Promise<any>}
-     */
     function call(params) {
         var body = new URLSearchParams({ user: USER, secret: SECRET });
         Object.keys(params).forEach(function (k) { body.append(k, params[k]); });
@@ -44,21 +39,24 @@ var Viewer = Viewer || {};
         });
     }
 
-    /**
-     * 获取并更新访问次数
-     * @returns {Promise<number>}
-     */
     Viewer.getVisitCount = function () {
         return call({ action: 'get', tag: TAG }).then(function (raw) {
+            console.log('[counter] GET 原始返回:', raw);
             var v = Array.isArray(raw) && raw[0] === 'VALUE' ? raw[2] : raw;
-            var n = parseInt(v, 10);
-            n = isNaN(n) ? 1 : n + 1;
-            return call({ action: 'update', tag: TAG, value: String(n) }).then(function () {
-                return n;
+            console.log('[counter] 提取值:', JSON.stringify(v));
+            var oldNum = parseInt(v, 10);
+            console.log('[counter] parseInt 结果:', oldNum, 'isNaN:', isNaN(oldNum));
+            var newNum = isNaN(oldNum) ? 1 : oldNum + 1;
+            console.log('[counter] 新值:', newNum);
+            return call({ action: 'update', tag: TAG, value: String(newNum) }).then(function (upRes) {
+                console.log('[counter] UPDATE 返回:', upRes);
+                return newNum;
+            }).catch(function (err) {
+                console.error('[counter] UPDATE 失败:', err);
+                throw err;
             });
         });
     };
 
-    // 全局快捷方式
     window.getVisitCount = Viewer.getVisitCount;
 })();
