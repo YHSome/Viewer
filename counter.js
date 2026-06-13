@@ -41,21 +41,16 @@ var Viewer = Viewer || {};
 
     Viewer.getVisitCount = function () {
         return call({ action: 'get', tag: TAG }).then(function (raw) {
-            console.log('[counter] GET 原始返回:', raw);
             var v = raw;
-            if (Array.isArray(raw) && raw[0] === 'VALUE') { v = raw[2]; }
-            else if (typeof raw === 'object' && raw !== null && raw[TAG] !== undefined) { v = raw[TAG]; }
-            console.log('[counter] 提取值:', JSON.stringify(v));
+            if (Array.isArray(raw) && raw[0] === 'VALUE') {
+                v = raw[2];
+            } else if (typeof raw === 'object' && raw !== null && raw[TAG] !== undefined) {
+                v = raw[TAG];
+            }
             var oldNum = parseInt(v, 10);
-            console.log('[counter] parseInt 结果:', oldNum, 'isNaN:', isNaN(oldNum));
             var newNum = isNaN(oldNum) ? 1 : oldNum + 1;
-            console.log('[counter] 新值:', newNum);
-            return call({ action: 'update', tag: TAG, value: String(newNum) }).then(function (upRes) {
-                console.log('[counter] UPDATE 返回:', upRes);
+            return call({ action: 'update', tag: TAG, value: String(newNum) }).then(function () {
                 return newNum;
-            }).catch(function (err) {
-                console.error('[counter] UPDATE 失败:', err);
-                throw err;
             });
         });
     };

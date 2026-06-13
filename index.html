@@ -244,16 +244,9 @@
     </script>
     <script src="counter.js"></script>
     <script>
-        console.log('[Viewer] counter.js 已加载，getVisitCount 类型:', typeof getVisitCount);
         getVisitCount()
-            .then(n => {
-                console.log('[Viewer] 获取计数成功:', n);
-                document.getElementById('counter').textContent = n;
-            })
-            .catch(err => {
-                console.error('[Viewer] 获取计数失败:', err);
-                document.getElementById('counter').textContent = '—';
-            });
+            .then(n => { document.getElementById('counter').textContent = n; })
+            .catch(() => { document.getElementById('counter').textContent = '—'; });
     </script>
 
 </body>
