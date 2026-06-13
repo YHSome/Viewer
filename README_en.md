@@ -1,5 +1,7 @@
 # Viewer — Page Visit Counter
 
+> **Preface:** Back in 2023, the author started tinkering with static blogs (long gone now). Seeing every other blog with a read-count feature made me envious — I wanted one too. I knew the theory, but AI-assisted coding wasn't mature enough back then, and I could never quite build it. That little wish sat on the shelf for years. Recently, after trying AI agents, it felt like discovering a new continent — and I finally got to close that chapter.
+
 > 📖 [中文文档](README.md)
 
 A pure frontend page visit counter powered by the TinyWebDB cloud database. Copy `counter.js` + one line of code to add visit counting to any static HTML page.
