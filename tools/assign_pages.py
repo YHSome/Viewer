@@ -18,7 +18,10 @@ import re
 import json
 
 META_TAG = '<meta name="x-viewer-page-id" content="{page_id}">'
-RECORD_FILE = '.viewer_pages.json'
+
+# 记录文件放在脚本自身所在目录（tools/）
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+RECORD_FILE = os.path.join(SCRIPT_DIR, '.viewer_pages.json')
 
 
 def find_html_files(directory):
@@ -43,21 +46,20 @@ def extract_page_id(html_path):
     return None
 
 
-def load_records(directory):
+def load_records():
     """加载持久化编号记录"""
-    path = os.path.join(directory, RECORD_FILE)
-    if os.path.isfile(path):
+    if os.path.isfile(RECORD_FILE):
         try:
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(RECORD_FILE, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception:
             pass
     return {}
 
 
-def save_records(directory, records):
+def save_records(records):
     """保存编号记录"""
-    path = os.path.join(directory, RECORD_FILE)
+    path = RECORD_FILE
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(records, f, ensure_ascii=False, indent=2)
 
@@ -112,7 +114,7 @@ def main():
         print('当前目录没有 .html 文件。')
         return
 
-    records = load_records(directory)
+    records = load_records()
 
     print(f'扫描到 {len(html_files)} 个 HTML 文件：\n')
 
@@ -151,7 +153,7 @@ def main():
             print(f'    #{records[f]}  {f}')
         # 不删除 records 中的条目，使编号永不重用
 
-    save_records(directory, records)
+    save_records(records)
 
     print(f'\n完成：本次分配 {assigned} 个，共 {len(html_files)} 个页面。')
     if records:
