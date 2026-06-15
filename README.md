@@ -37,7 +37,7 @@ python -m http.server 8080
 # 浏览器打开 http://localhost:8080/index.html
 ```
 
-每次刷新页面，计数器 +1。
+每次刷新页面，计数器 +1。打开 `index1.html` 查看多页面独立计数效果。
 
 ## 功能
 
@@ -48,16 +48,29 @@ python -m http.server 8080
 | 单页独立访客 | `js/unique.js` | 基于 localStorage 判重，同设备只计一次 |
 | 评论系统 | `js/comment.js` | 访客留言，含昵称/邮箱/内容/时间 |
 
-共同特点：
-- **零依赖** — 纯 JavaScript，不依赖任何框架
-- **复制即用** — 下载 `.js` 文件，一行 `<script>` 引入，调用函数即可
-- **持久化** — 数据存储在 TinyWebDB 云端
-- **纯逻辑** — 不绑定 UI，文案和样式由调用方控制
+共同特点：零依赖、复制即用、云端持久化、不绑定 UI。
 
-## 工作流程
+### 多页面支持
+
+每个页面通过 `<meta name="x-viewer-page-id" content="N">` 声明编号，JS 自动使用独立的数据 tag，互不干扰。
+
+使用编号脚本自动管理：
+
+```bash
+python tools/assign_pages.py
+```
+
+- 自动扫描目录下所有 `.html` 文件
+- 为每个文件分配唯一编号并注入 meta 标签
+- 已编号的页面跳过，已删除的编号永不重用
+- 编号记录持久化在 `tools/.viewer_pages.json`
+
+### 工作流程
 
 ```
-页面加载 → get('watch')
+页面加载 → 读取 meta 编号
+              │
+         get('watch_N') ← N 为页面编号
               │
     ┌─────────┴─────────┐
     │ 有值              │ 无值 / 首次访问
@@ -65,17 +78,10 @@ python -m http.server 8080
     │ new = old + 1     │ new = 1
     └─────────┬─────────┘
               │
-         update('watch', new)
+         update('watch_N', new)
               │
          返回 new → 页面渲染
 ```
-
-## 特点
-
-- **零依赖** — 纯 JavaScript，不依赖任何框架或库
-- **纯逻辑** — 不操作 DOM，可在任意页面复用
-- **持久化** — 数据存储在 TinyWebDB 云端，不随页面关闭而丢失
-- **轻量** — 客户端脚本约 50 行，逻辑清晰，易于修改
 
 ## 部署注意
 
@@ -118,8 +124,8 @@ https://tinywebdb.appinventor.space/webdb-share1-b3280975
 
 | 参数 | 值 | 说明 |
 |------|-----|------|
-| `user` | `share1` | 用户名 |
-| `secret` | `b3280975` | 密钥 |
+| `user` | `aaaaa` | 用户名 |
+| `secret` | `d1bdf09a` | 密钥 |
 | `action` | `get` \| `update` \| `delete` \| `count` \| `search` | 操作类型 |
 
 ### 各 action 参数与返回值

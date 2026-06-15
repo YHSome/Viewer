@@ -48,16 +48,29 @@ Each page refresh increments the counter by 1.
 | Unique Visitors | `js/unique.js` | One count per device via localStorage |
 | Comment System | `js/comment.js` | Visitor messages with name/email/content/timestamp |
 
-All modules share:
-- **Zero dependencies** — pure JavaScript, no frameworks
-- **Copy & use** — download a `.js` file, one `<script>` tag, call a function
-- **Persistent** — data lives in the TinyWebDB cloud
-- **Logic-only** — no DOM binding; labels and styling are up to you
+All modules share: zero dependencies, copy & use, cloud persistence, logic-only.
 
-## How It Works
+### Multi-page Support
+
+Each page declares an ID via `<meta name="x-viewer-page-id" content="N">`. The JS scripts automatically namespace data by page ID, keeping each page's counts and comments isolated.
+
+Use the assignment script:
+
+```bash
+python tools/assign_pages.py
+```
+
+- Scans all `.html` files in the directory
+- Assigns a unique, permanent ID to each file
+- Injects the meta tag automatically
+- Deleted IDs are never reused (recorded in `tools/.viewer_pages.json`)
+
+### How It Works
 
 ```
-Page load → get('watch')
+Page load → read meta page ID
+               │
+         get('watch_N') ← N = page ID
                │
     ┌──────────┴──────────┐
     │ Value exists         │ First visit / no value
@@ -65,17 +78,10 @@ Page load → get('watch')
     │ new = old + 1        │ new = 1
     └──────────┬──────────┘
                │
-          update('watch', new)
+          update('watch_N', new)
                │
           return new → render on page
 ```
-
-## Highlights
-
-- **Zero dependencies** — pure JavaScript, no frameworks or libraries
-- **Logic-only** — no DOM manipulation; reusable on any page
-- **Persistent** — data lives in the TinyWebDB cloud, survives page closes
-- **Lightweight** — client script ~50 lines, easy to customize
 
 ## Deployment Notes
 
@@ -118,8 +124,8 @@ https://tinywebdb.appinventor.space/webdb-share1-b3280975
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
-| `user` | `share1` | Username |
-| `secret` | `b3280975` | Secret key |
+| `user` | `aaaaa` | Username |
+| `secret` | `d1bdf09a` | Secret key |
 | `action` | `get` \| `update` \| `delete` \| `count` \| `search` | Operation type |
 
 ### Action Parameters & Return Values
