@@ -186,8 +186,9 @@
             <p class="pl">月下两相安。</p>
         </div>
         <div class="stats">
-            <p class="stat-item">页面打开次数：<span class="stat-value" id="counter">—</span></p>
-            <p class="stat-item">独立访客数：<span class="stat-value" id="uniqueCounter">—</span></p>
+            <p class="stat-item">全站浏览量：<span class="stat-value" id="globalCounter">—</span></p>
+            <p class="stat-item">本页浏览量：<span class="stat-value" id="counter">—</span></p>
+            <p class="stat-item">本页访客数：<span class="stat-value" id="uniqueCounter">—</span></p>
         </div>
         <a class="back-link" href="index.html">← 返回首页</a>
     </div>
@@ -225,11 +226,16 @@
         })();
     </script>
 
+    <script src="global.js"></script>
     <script src="counter.js"></script>
     <script src="unique.js"></script>
     <script src="comment.js"></script>
     <script>
-        // 计数器
+        // 全站计数器
+        Viewer.getGlobalCount()
+            .then(function (n) { document.getElementById('globalCounter').textContent = n; })
+            .catch(function ()  { document.getElementById('globalCounter').textContent = '—'; });
+        // 本页计数器
         getVisitCount()
             .then(function (n) { document.getElementById('counter').textContent = n; })
             .catch(function ()  { document.getElementById('counter').textContent = '—'; });

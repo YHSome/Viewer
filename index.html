@@ -314,8 +314,9 @@
             <p class="line">云深藏岁月，</p>
             <p class="line">静夜伴繁星。</p>
         </div>
-        <p class="counter">页面打开次数：<span id="counter">—</span></p>
-        <p class="counter">独立访客数：<span id="uniqueCounter">—</span></p>
+        <p class="counter">全站浏览量：<span id="globalCounter">—</span></p>
+        <p class="counter">本页浏览量：<span id="counter">—</span></p>
+        <p class="counter">本页访客数：<span id="uniqueCounter">—</span></p>
         <p style="margin-top:16px;">
             <a class="github-link" href="index1.html">查看第二页演示 →</a>
             <span style="color:#4a4038;margin:0 8px;">|</span>
@@ -361,8 +362,12 @@
         }
 
     </script>
+    <script src="global.js"></script>
     <script src="counter.js"></script>
     <script>
+        Viewer.getGlobalCount()
+            .then(n => { document.getElementById('globalCounter').textContent = n; })
+            .catch(() => { document.getElementById('globalCounter').textContent = '—'; });
         getVisitCount()
             .then(n => { document.getElementById('counter').textContent = n; })
             .catch(() => { document.getElementById('counter').textContent = '—'; });

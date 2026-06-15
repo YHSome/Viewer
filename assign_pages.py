@@ -2,22 +2,23 @@
 """
 Viewer — 页面编号脚本
 
-扫描目录下所有 .html 文件，按文件名排序后分配唯一编号。
-在每个 HTML 的 <head> 中注入 <meta name="x-viewer-page-id" content="N">，
-使 counter.js / unique.js / comment.js 自动识别并通过独立 tag 存储数据。
+扫描目录下所有 .html 文件，为每个页面分配唯一 ID。
+已编号的页面保留原编号；新页面获得一个全新的、从未用过的 ID。
+即使某个 HTML 文件被删除，其 ID 也永远不会被分配给其他页面。
+
+编号记录持久化存储在 .viewer_pages.json 中。
 
 用法：
     python assign_pages.py [目录路径]
-
-    若不传路径，默认扫描当前目录（*.html）。
-    已存在的编号不会重复分配，只会为新文件追加编号。
 """
 
 import os
 import sys
 import re
+import json
 
 META_TAG = '<meta name="x-viewer-page-id" content="{page_id}">'
+RECORD_FILE = '.viewer_pages.json'
 
 
 def find_html_files(directory):
@@ -30,7 +31,7 @@ def find_html_files(directory):
 
 
 def extract_page_id(html_path):
-    """从 HTML 文件中提取已分配的 page id，没有则返回 None"""
+    """从 HTML 的 meta 标签中提取已分配的 page id，没有则返回 None"""
     try:
         with open(html_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -42,39 +43,62 @@ def extract_page_id(html_path):
     return None
 
 
+def load_records(directory):
+    """加载持久化编号记录"""
+    path = os.path.join(directory, RECORD_FILE)
+    if os.path.isfile(path):
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+
+def save_records(directory, records):
+    """保存编号记录"""
+    path = os.path.join(directory, RECORD_FILE)
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(records, f, ensure_ascii=False, indent=2)
+
+
 def inject_page_id(html_path, page_id):
-    """在 HTML 的 <head> 中注入 page id meta 标签"""
+    """在 HTML 的 <head> 中注入/更新 page id meta 标签"""
     with open(html_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # 检查是否已有
     if re.search(r'<meta\s+name="x-viewer-page-id"\s+content="\d+"\s*/?>', content):
-        # 替换已有
         content = re.sub(
             r'<meta\s+name="x-viewer-page-id"\s+content="\d+"\s*/?>',
             META_TAG.format(page_id=page_id),
             content
         )
-        print(f'  更新: {os.path.basename(html_path)} → page #{page_id}')
+        action = '更新'
     else:
-        # 在 <head> 内插入
         head_match = re.search(r'<head[^>]*>', content, re.IGNORECASE)
         if head_match:
             pos = head_match.end()
             content = content[:pos] + '\n    ' + META_TAG.format(page_id=page_id) + content[pos:]
-            print(f'  注入: {os.path.basename(html_path)} → page #{page_id}')
+            action = '注入'
         else:
             print(f'  跳过: {os.path.basename(html_path)} (找不到 <head>)')
             return False
 
     with open(html_path, 'w', encoding='utf-8') as f:
         f.write(content)
+    print(f'  {action}: {os.path.basename(html_path)} → page #{page_id}')
     return True
 
 
+def next_available_id(records):
+    """获取下一个可用编号（永不重用已删除的 ID）"""
+    if not records:
+        return 1
+    return max(records.values()) + 1
+
+
 def main():
-    directory = sys.argv[1] if len(sys.argv) > 1 else '.'
-    directory = os.path.abspath(directory)
+    directory = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else '.')
 
     if not os.path.isdir(directory):
         print(f'错误："{directory}" 不是有效目录')
@@ -86,31 +110,51 @@ def main():
         print('当前目录没有 .html 文件。')
         return
 
+    records = load_records(directory)
+
     print(f'扫描到 {len(html_files)} 个 HTML 文件：\n')
 
-    # 先读取已有编号，找出最大编号
-    existing_ids = {}
-    for f in html_files:
-        fpath = os.path.join(directory, f)
-        pid = extract_page_id(fpath)
-        if pid is not None:
-            existing_ids[f] = pid
-
-    next_id = max(existing_ids.values()) + 1 if existing_ids else 1
-
-    # 为没有编号的文件分配新编号
     assigned = 0
     for f in html_files:
         fpath = os.path.join(directory, f)
-        if f in existing_ids:
-            print(f'  #{existing_ids[f]}  {f} (已有)')
+
+        # 1. 先看 HTML 里有没有已有的 meta 编号
+        meta_id = extract_page_id(fpath)
+
+        if meta_id is not None:
+            # HTML 已有编号：同步到记录文件
+            if f not in records or records[f] != meta_id:
+                records[f] = meta_id
+                print(f'  #{meta_id}  {f} (已有，同步记录)')
+            else:
+                print(f'  #{meta_id}  {f} (已有)')
+        elif f in records:
+            # HTML 丢失了 meta 标签，但记录中有：恢复原编号
+            pid = records[f]
+            inject_page_id(fpath, pid)
+            assigned += 1
         else:
-            inject_page_id(fpath, next_id)
-            next_id += 1
+            # 全新文件：分配一个从未用过的编号
+            pid = next_available_id(records)
+            inject_page_id(fpath, pid)
+            records[f] = pid
             assigned += 1
 
-    print(f'\n完成：新分配 {assigned} 个编号，共 {len(html_files)} 个页面。')
-    print('现在 counter.js / unique.js / comment.js 会自动为每个页面使用独立的数据。')
+    # 清理记录中已被删除的文件（但编号永久保留，不复用）
+    current_files = set(html_files)
+    deleted = [f for f in records if f not in current_files]
+    if deleted:
+        print(f'\n  注意：{len(deleted)} 个文件已删除，其编号永久保留不复用：')
+        for f in deleted:
+            print(f'    #{records[f]}  {f}')
+        # 不删除 records 中的条目，使编号永不重用
+
+    save_records(directory, records)
+
+    print(f'\n完成：本次分配 {assigned} 个，共 {len(html_files)} 个页面。')
+    if records:
+        max_id = max(records.values())
+        print(f'已使用最大编号：{max_id}（下一个新页面将从 #{max_id + 1} 开始）')
 
 
 if __name__ == '__main__':
