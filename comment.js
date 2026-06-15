@@ -9,8 +9,15 @@ var Viewer = Viewer || {};
     var API    = 'https://tinywebdb.appinventor.space/api';
     var USER   = 'aaaaa';
     var SECRET = 'd1bdf09a';
-    var PREFIX = 'comment_';
-    var COUNT_TAG = 'comment_count';
+
+    // 读取页面编号，实现多页面独立评论
+    function getPageId() {
+        var meta = document.querySelector('meta[name="x-viewer-page-id"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+    var pid = getPageId();
+    var PREFIX    = pid ? 'comment_' + pid + '_' : 'comment_';
+    var COUNT_TAG = pid ? 'comment_count_' + pid : 'comment_count';
 
     function call(params) {
         var body = new URLSearchParams({ user: USER, secret: SECRET });
