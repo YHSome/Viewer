@@ -7,8 +7,8 @@ var Viewer = Viewer || {};
 
 (function () {
     var API    = 'https://tinywebdb.appinventor.space/api';
-    var USER   = 'share1';
-    var SECRET = 'b3280975';
+    var USER   = 'aaaaa';
+    var SECRET = 'd1bdf09a';
     var TAG    = 'unique_watch';
     var STORAGE_KEY = 'viewer_visited';
 
