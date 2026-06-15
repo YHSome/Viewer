@@ -98,7 +98,9 @@ def next_available_id(records):
 
 
 def main():
-    directory = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else '.')
+    # 默认扫描脚本所在目录的上级（即项目根目录，HTML 文件所在地）
+    default_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    directory = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else default_dir)
 
     if not os.path.isdir(directory):
         print(f'错误："{directory}" 不是有效目录')
