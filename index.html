@@ -266,6 +266,11 @@
             color: #c4b896;
             letter-spacing: 0.05em;
         }
+        .comment-email {
+            font-size: 0.75rem;
+            color: #5a5248;
+            margin-left: 6px;
+        }
         .comment-time {
             font-size: 0.75rem;
             color: #5a5248;
@@ -379,7 +384,9 @@
                 html +=
                     '<div class="comment-item">' +
                     '<div class="comment-meta">' +
-                    '<span class="comment-name">' + escapeHTML(c.name) + '</span>' +
+                    '<span class="comment-name">' + escapeHTML(c.name) +
+                    (c.email ? ' <span class="comment-email">' + escapeHTML(c.email) + '</span>' : '') +
+                    '</span>' +
                     '<span class="comment-time">' + formatTime(c.time) + '</span>' +
                     '</div>' +
                     '<div class="comment-content">' + escapeHTML(c.content) + '</div>' +
