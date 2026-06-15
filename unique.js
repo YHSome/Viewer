@@ -1,6 +1,6 @@
 /**
  * Viewer — 独立访客计数器
- * 基于 Cookie 判重，首次访问才 +1，通过 TinyWebDB 持久化存储
+ * 基于 localStorage 判重，首次访问才 +1，通过 TinyWebDB 持久化存储
  */
 
 var Viewer = Viewer || {};
@@ -10,7 +10,7 @@ var Viewer = Viewer || {};
     var USER   = 'share1';
     var SECRET = 'b3280975';
     var TAG    = 'unique_watch';
-    var COOKIE_NAME = 'viewer_visited';
+    var STORAGE_KEY = 'viewer_visited';
 
     function call(params) {
         var body = new URLSearchParams({ user: USER, secret: SECRET });
@@ -35,28 +35,10 @@ var Viewer = Viewer || {};
         return v;
     }
 
-    /** 检查 Cookie 是否存在 */
-    function hasCookie(name) {
-        return document.cookie.split(';').some(function (c) {
-            return c.trim().indexOf(name + '=') === 0;
-        });
-    }
-
-    /** 设置持久 Cookie */
-    function setCookie(name, value, days) {
-        var expires = '';
-        if (days) {
-            var d = new Date();
-            d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-            expires = '; expires=' + d.toUTCString();
-        }
-        document.cookie = name + '=' + value + expires + '; path=/; SameSite=Lax';
-    }
-
     /**
      * 获取独立访客数
-     * 首次访问（无 Cookie）→ +1 再返回
-     * 回访（有 Cookie）→ 直接返回当前值
+     * 首次访问（localStorage 无标记）→ +1 再返回
+     * 回访（localStorage 有标记）→ 直接返回当前值
      * @returns {Promise<{count: number, isNew: boolean}>}
      */
     Viewer.getUniqueCount = function () {
@@ -65,10 +47,10 @@ var Viewer = Viewer || {};
             var curNum = parseInt(v, 10);
             if (isNaN(curNum)) curNum = 0;
 
-            var isNew = !hasCookie(COOKIE_NAME);
+            var isNew = !localStorage.getItem(STORAGE_KEY);
 
             if (isNew) {
-                setCookie(COOKIE_NAME, '1', 365);
+                localStorage.setItem(STORAGE_KEY, '1');
                 curNum = curNum + 1;
                 return call({ action: 'update', tag: TAG, value: String(curNum) }).then(function () {
                     return { count: curNum, isNew: true };
