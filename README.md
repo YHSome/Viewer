@@ -15,13 +15,18 @@
 ```
 Viewer/
 ├── index.html                    # 演示页面
-├── counter.js                    # 累计浏览量（每次刷新 +1）
-├── unique.js                     # 独立访客数（同设备只计一次）
-├── comment.js                    # 评论系统（留言存 TinyWebDB）
+├── index1.html                   # 演示页面（第二页）
 ├── README.md                     # 项目说明文档
 ├── README_en.md                  # 英文版项目说明
 ├── tutorial.md                   # 新手教程（中文）
-└── tutorial_en.md                # 新手教程（英文）
+├── tutorial_en.md                # 新手教程（英文）
+├── js/                           # 核心脚本
+│   ├── global.js                 # 全站累计浏览量
+│   ├── counter.js                # 单页累计浏览量
+│   ├── unique.js                 # 单页独立访客数
+│   └── comment.js                # 评论系统
+└── tools/                        # 辅助工具
+    └── assign_pages.py           # 页面编号脚本
 ```
 
 ## 快速体验
@@ -38,9 +43,10 @@ python -m http.server 8080
 
 | 模块 | 文件 | 说明 |
 |------|------|------|
-| 累计浏览量 | `counter.js` | 每次页面刷新 +1，数据存 TinyWebDB |
-| 独立访客数 | `unique.js` | 基于 localStorage 判重，同设备多次刷新只计一次 |
-| 评论系统 | `comment.js` | 访客留言，含昵称/邮箱/内容/时间，数据存 TinyWebDB |
+| 全站浏览量 | `js/global.js` | 所有页面共享，每次刷新 +1 |
+| 单页浏览量 | `js/counter.js` | 每页独立计数，每次刷新 +1 |
+| 单页独立访客 | `js/unique.js` | 基于 localStorage 判重，同设备只计一次 |
+| 评论系统 | `js/comment.js` | 访客留言，含昵称/邮箱/内容/时间 |
 
 共同特点：
 - **零依赖** — 纯 JavaScript，不依赖任何框架

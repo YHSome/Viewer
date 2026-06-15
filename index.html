@@ -362,8 +362,8 @@
         }
 
     </script>
-    <script src="global.js"></script>
-    <script src="counter.js"></script>
+    <script src="js/global.js"></script>
+    <script src="js/counter.js"></script>
     <script>
         Viewer.getGlobalCount()
             .then(n => { document.getElementById('globalCounter').textContent = n; })
@@ -372,7 +372,7 @@
             .then(n => { document.getElementById('counter').textContent = n; })
             .catch(() => { document.getElementById('counter').textContent = '—'; });
     </script>
-    <script src="unique.js"></script>
+    <script src="js/unique.js"></script>
     <script>
         Viewer.getUniqueCount()
             .then(r => { document.getElementById('uniqueCounter').textContent = r.count; })

@@ -81,13 +81,13 @@ var SECRET = 'a1b2c3d4...';  // 换成你的密钥
 
 ## 第三步：复制计数器文件
 
-1. 将 [`counter.js`](counter.js) 下载到你的项目文件夹（和你的 `.html` 文件放在一起）
+1. 将 [`counter.js`](js/counter.js) 下载到你的项目文件夹（和你的 `.html` 文件放在一起）
 
 2. 在 `</body>` **的上一行**，加入这两行：
 
 ```html
     <!-- ↓↓↓ 新增：计数器 ↓↓↓ -->
-    <script src="counter.js"></script>
+    <script src="js/counter.js"></script>
     <script>
         getVisitCount()
             .then(function (n) { document.getElementById('counter').textContent = n; })
@@ -162,7 +162,7 @@ python -m http.server 8080
     <p>页面打开次数：<span id="counter">—</span></p>
 
     <!-- 计数器 -->
-    <script src="counter.js"></script>
+    <script src="js/counter.js"></script>
     <script>
         getVisitCount()
             .then(function (n) { document.getElementById('counter').textContent = n; })
@@ -185,7 +185,7 @@ python -m http.server 8080
 
 ### 步骤
 
-1. 将 [`unique.js`](unique.js) 下载到项目文件夹
+1. 将 [`unique.js`](js/unique.js) 下载到项目文件夹
 
 2. 在刚才的计数器旁边加一行：
 
@@ -197,7 +197,7 @@ python -m http.server 8080
 3. 在 `</body>` 前加上：
 
 ```html
-<script src="unique.js"></script>
+<script src="js/unique.js"></script>
 <script>
     Viewer.getUniqueCount()
         .then(function (r) { document.getElementById('uniqueCounter').textContent = r.count; })
@@ -217,7 +217,7 @@ python -m http.server 8080
 
 ### 步骤
 
-1. 将 [`comment.js`](comment.js) 下载到项目文件夹
+1. 将 [`comment.js`](js/comment.js) 下载到项目文件夹
 
 2. 在页面里加一个评论区：
 
@@ -335,7 +335,7 @@ A: 可以。修改这行里的文字：
 
 ### Q: 怎么让多个页面各自独立计数？
 
-A: 把每个页面的 `counter.js` 复制一份（比如 `counter_page2.js`），把文件里的 `var TAG = 'watch';` 改成不同的名字，比如 `var TAG = 'page1';`、`var TAG = 'page2';`。
+A: 给每个页面运行 `python tools/assign_pages.py` 自动分配独立编号，或手动在 HTML 的 `<head>` 中加 `<meta name="x-viewer-page-id" content="1">` 和 `<meta name="x-viewer-page-id" content="2">`，JS 会自动为每个页面使用独立的数据 tag。
 
 ### Q: 我的数据会被别人看到吗？
 

@@ -15,13 +15,18 @@ A pure frontend page visit counter powered by the TinyWebDB cloud database. Copy
 ```
 Viewer/
 ├── index.html                    # Demo page
-├── counter.js                    # Page view counter (increments every refresh)
-├── unique.js                     # Unique visitor counter (one per device)
-├── comment.js                    # Comment system (stored in TinyWebDB)
+├── index1.html                   # Demo page (second page)
 ├── README.md                     # Project docs (Chinese)
 ├── README_en.md                  # Project docs (English)
 ├── tutorial.md                   # Beginner's tutorial (Chinese)
-└── tutorial_en.md                # Beginner's tutorial (English)
+├── tutorial_en.md                # Beginner's tutorial (English)
+├── js/                           # Core scripts
+│   ├── global.js                 # Site-wide page view counter
+│   ├── counter.js                # Per-page view counter
+│   ├── unique.js                 # Per-page unique visitor counter
+│   └── comment.js                # Comment system
+└── tools/                        # Utilities
+    └── assign_pages.py           # Page ID assignment script
 ```
 
 ## Quick Start
@@ -38,9 +43,10 @@ Each page refresh increments the counter by 1.
 
 | Module | File | Description |
 |--------|------|-------------|
-| Page Views | `counter.js` | +1 on every refresh, stored in TinyWebDB |
-| Unique Visitors | `unique.js` | One count per device via localStorage, stored in TinyWebDB |
-| Comment System | `comment.js` | Visitor messages with name/email/content/timestamp in TinyWebDB |
+| Site-wide Views | `js/global.js` | Shared across all pages, +1 every refresh |
+| Page Views | `js/counter.js` | Per-page counter, +1 every refresh |
+| Unique Visitors | `js/unique.js` | One count per device via localStorage |
+| Comment System | `js/comment.js` | Visitor messages with name/email/content/timestamp |
 
 All modules share:
 - **Zero dependencies** — pure JavaScript, no frameworks

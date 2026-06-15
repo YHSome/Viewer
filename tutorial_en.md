@@ -81,13 +81,13 @@ Find a suitable place in your HTML (e.g., near the bottom of the page) and add t
 
 ## Step 3: Copy the Counter File
 
-1. Download [`counter.js`](counter.js) into your project folder (next to your `.html` file)
+1. Download [`counter.js`](js/counter.js) into your project folder (next to your `.html` file)
 
 2. On the line just **above `</body>`**, add these two lines:
 
 ```html
     <!-- ↓↓↓ New: counter ↓↓↓ -->
-    <script src="counter.js"></script>
+    <script src="js/counter.js"></script>
     <script>
         getVisitCount()
             .then(function (n) { document.getElementById('counter').textContent = n; })
@@ -162,7 +162,7 @@ Combining Steps 2 and 3, a full page looks like this:
     <p>Page visits: <span id="counter">—</span></p>
 
     <!-- Counter -->
-    <script src="counter.js"></script>
+    <script src="js/counter.js"></script>
     <script>
         getVisitCount()
             .then(function (n) { document.getElementById('counter').textContent = n; })
@@ -185,7 +185,7 @@ Uses `localStorage` as a flag. The first visit sets a marker; subsequent refresh
 
 ### Steps
 
-1. Download [`unique.js`](unique.js) into your project folder
+1. Download [`unique.js`](js/unique.js) into your project folder
 
 2. Add a second counter line next to the first:
 
@@ -197,7 +197,7 @@ Uses `localStorage` as a flag. The first visit sets a marker; subsequent refresh
 3. Add before `</body>`:
 
 ```html
-<script src="unique.js"></script>
+<script src="js/unique.js"></script>
 <script>
     Viewer.getUniqueCount()
         .then(function (r) { document.getElementById('uniqueCounter').textContent = r.count; })
@@ -217,7 +217,7 @@ More complex than the counters, but the same principle — form submission → s
 
 ### Steps
 
-1. Download [`comment.js`](comment.js) into your project folder
+1. Download [`comment.js`](js/comment.js) into your project folder
 
 2. Add a comment section to your page:
 
@@ -239,7 +239,7 @@ More complex than the counters, but the same principle — form submission → s
 3. Add the comment script before `</body>`:
 
 ```html
-<script src="comment.js"></script>
+<script src="js/comment.js"></script>
 <script>
     var cmtList = document.getElementById('commentList');
 
@@ -333,7 +333,7 @@ For example, change it to `Views: ` or `Visitors: `.
 
 ### Q: How do I give each page its own independent counter?
 
-A: Make a copy of `counter.js` for each page (e.g. `counter_page2.js`), and change `var TAG = 'watch';` inside each copy to a different name, e.g. `var TAG = 'page1';`, `var TAG = 'page2';`.
+A: Run `python tools/assign_pages.py` to auto-assign unique IDs to each page, or manually add `<meta name="x-viewer-page-id" content="1">` and `<meta name="x-viewer-page-id" content="2">` to each page's `<head>`. The JS scripts automatically use the page ID for data isolation.
 
 ### Q: Can other people see my data?
 
