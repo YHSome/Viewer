@@ -15,7 +15,9 @@ A pure frontend page visit counter powered by the TinyWebDB cloud database. Copy
 ```
 Viewer/
 ├── index.html                    # Demo page
-├── counter.js                    # Standalone counter script (copy & use)
+├── counter.js                    # Page view counter (increments every refresh)
+├── unique.js                     # Unique visitor counter (one per device)
+├── comment.js                    # Comment system (stored in TinyWebDB)
 ├── README.md                     # Project docs (Chinese)
 ├── README_en.md                  # Project docs (English)
 ├── tutorial.md                   # Beginner's tutorial (Chinese)
@@ -34,10 +36,17 @@ Each page refresh increments the counter by 1.
 
 ## Features
 
-- **Auto-read**: Fetches the current count from the database on page load
-- **Auto-increment**: +1 on every visit and writes back to the database
-- **Fallback**: Creates the record automatically on first visit (starts at 1)
-- **Number-only output**: Labels stay in HTML; the counter only returns a number, decoupled from UI
+| Module | File | Description |
+|--------|------|-------------|
+| Page Views | `counter.js` | +1 on every refresh, stored in TinyWebDB |
+| Unique Visitors | `unique.js` | One count per device via localStorage, stored in TinyWebDB |
+| Comment System | `comment.js` | Visitor messages with name/email/content/timestamp in TinyWebDB |
+
+All modules share:
+- **Zero dependencies** — pure JavaScript, no frameworks
+- **Copy & use** — download a `.js` file, one `<script>` tag, call a function
+- **Persistent** — data lives in the TinyWebDB cloud
+- **Logic-only** — no DOM binding; labels and styling are up to you
 
 ## How It Works
 

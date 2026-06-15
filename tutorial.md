@@ -2,15 +2,17 @@
 
 > ⬅ [返回项目说明](README.md)
 
-本教程面向**刚刚做完一个 HTML 页面**、想加一个「页面打开次数」功能的用户。全程不需要安装任何软件，复制粘贴即可完成。
+本教程面向**刚刚做完一个 HTML 页面**的用户。从零开始，一步步加上累计浏览量、独立访客数、评论系统。
 
 ---
 
 ## 你将学会
 
-- 在页面上显示一个访问计数器
-- 每次刷新页面，数字自动 +1
-- 刷新后数字不会重置（数据存在云端）
+- 累计浏览量 — 每次刷新 +1
+- 独立访客数 — 同一个人多次刷新只计一次
+- 评论系统 — 访客留言，数据存云端
+
+教程按难度从易到难排列，可以只做前两部分。
 
 ---
 
@@ -170,6 +172,143 @@ python -m http.server 8080
 </body>
 </html>
 ```
+
+---
+
+## 进阶篇：独立访客数
+
+上面的计数器每次刷新都 +1，适合统计「页面被打开几次」。但有时你想知道「有多少个不同的人来过」——同一个设备反复刷新只算一次，换台手机才算新访客。
+
+### 原理
+
+通过 `localStorage` 做标记：第一次访问时存一个标记，以后刷新发现标记已存在就跳过，不 +1。
+
+### 步骤
+
+1. 将 [`unique.js`](unique.js) 下载到项目文件夹
+
+2. 在刚才的计数器旁边加一行：
+
+```html
+<p>页面打开次数：<span id="counter">—</span></p>
+<p>独立访客数：<span id="uniqueCounter">—</span></p>   <!-- ← 新增 -->
+```
+
+3. 在 `</body>` 前加上：
+
+```html
+<script src="unique.js"></script>
+<script>
+    Viewer.getUniqueCount()
+        .then(function (r) { document.getElementById('uniqueCounter').textContent = r.count; })
+        .catch(function ()  { document.getElementById('uniqueCounter').textContent = '—'; });
+</script>
+```
+
+4. 保存刷新。第一次打开两个数字都 +1。之后再刷新，只有浏览量 +1，访客数不变。换浏览器/隐私模式打开，访客数才会再 +1。
+
+> 想测试？F12 → Application → Local Storage → 删掉 `viewer_visited` → 刷新即视为新访客。
+
+---
+
+## 高级篇：评论系统
+
+比计数器复杂一些，但原理一样——表单提交 → 存到 TinyWebDB → 页面加载时读出来。
+
+### 步骤
+
+1. 将 [`comment.js`](comment.js) 下载到项目文件夹
+
+2. 在页面里加一个评论区：
+
+```html
+<div class="comment-section">
+    <h2>留言</h2>
+    <form class="comment-form" id="commentForm">
+        <input type="text" id="cmtName" placeholder="昵称" maxlength="20" required>
+        <input type="email" id="cmtEmail" placeholder="邮箱（选填）" maxlength="60">
+        <textarea id="cmtContent" placeholder="说点什么……" maxlength="500" required></textarea>
+        <button type="submit">发 布</button>
+    </form>
+    <div class="comment-list" id="commentList">
+        <p>加载中...</p>
+    </div>
+</div>
+```
+
+3. 在 `</body>` 前加上评论脚本：
+
+```html
+<script src="comment.js"></script>
+<script>
+    var cmtList = document.getElementById('commentList');
+
+    function formatTime(isoStr) {
+        var d = new Date(isoStr);
+        var pad = function (n) { return n < 10 ? '0' + n : n; };
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+            + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    }
+
+    function escapeHTML(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function renderComments(comments) {
+        if (!comments || comments.length === 0) {
+            cmtList.innerHTML = '<p>暂无留言，来坐沙发 🛋️</p>';
+            return;
+        }
+        var html = '';
+        comments.forEach(function (c) {
+            html +=
+                '<div class="comment-item">' +
+                '<div class="comment-meta">' +
+                '<span>' + escapeHTML(c.name) +
+                (c.email ? ' · ' + escapeHTML(c.email) : '') + '</span>' +
+                '<span>' + formatTime(c.time) + '</span>' +
+                '</div>' +
+                '<div>' + escapeHTML(c.content) + '</div>' +
+                '</div>';
+        });
+        cmtList.innerHTML = html;
+    }
+
+    // 加载已有评论
+    Viewer.loadComments().then(renderComments).catch(function () {
+        cmtList.innerHTML = '<p>加载失败，请刷新重试</p>';
+    });
+
+    // 提交评论
+    document.getElementById('commentForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var name = document.getElementById('cmtName').value.trim();
+        var email = document.getElementById('cmtEmail').value.trim();
+        var content = document.getElementById('cmtContent').value.trim();
+        if (!name || !content) return;
+
+        var btn = this.querySelector('button');
+        btn.textContent = '提交中...';
+        btn.disabled = true;
+
+        Viewer.submitComment({ name: name, email: email, content: content }).then(function () {
+            document.getElementById('cmtContent').value = '';
+            btn.textContent = '已发布 ✓';
+            setTimeout(function () { btn.textContent = '发 布'; btn.disabled = false; }, 2000);
+            return Viewer.loadComments();
+        }).then(renderComments).catch(function () {
+            btn.textContent = '失败，重试';
+            btn.disabled = false;
+        });
+    });
+</script>
+```
+
+4. 评论区的样式可以参考 [`index.html`](index.html) 里的 `.comment-section` 部分，直接复制过去就行。
+
+> 每条评论包含昵称、邮箱、内容、时间，作为一个独立 tag 存储在 TinyWebDB。用完即走，无需后端。
 
 ---
 

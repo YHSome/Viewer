@@ -2,15 +2,17 @@
 
 > ⬅ [Back to project README](README_en.md)
 
-This tutorial is for anyone who **just finished building an HTML page** and wants to add a visit counter. No software installation required — just copy and paste.
+This tutorial is for anyone who **just finished building an HTML page**. Start from zero, step by step, and add page views, unique visitors, and a comment system.
 
 ---
 
 ## What You'll Learn
 
-- Display a visit counter on your page
-- Each refresh auto-increments by 1
-- The number persists after refresh (stored in the cloud)
+- Page view counter — increments on every refresh
+- Unique visitor counter — one count per device/browser
+- Comment system — visitor messages stored in the cloud
+
+Tutorial is ordered from easy to advanced. You can stop at any point.
 
 ---
 
@@ -170,6 +172,141 @@ Combining Steps 2 and 3, a full page looks like this:
 </body>
 </html>
 ```
+
+---
+
+## Advanced: Unique Visitor Counter
+
+The page view counter increments on every refresh. But what if you want to count *distinct* visitors — one per device/browser?
+
+### How It Works
+
+Uses `localStorage` as a flag. The first visit sets a marker; subsequent refreshes see the marker and skip the increment.
+
+### Steps
+
+1. Download [`unique.js`](unique.js) into your project folder
+
+2. Add a second counter line next to the first:
+
+```html
+<p>Page views: <span id="counter">—</span></p>
+<p>Unique visitors: <span id="uniqueCounter">—</span></p>   <!-- ← new -->
+```
+
+3. Add before `</body>`:
+
+```html
+<script src="unique.js"></script>
+<script>
+    Viewer.getUniqueCount()
+        .then(function (r) { document.getElementById('uniqueCounter').textContent = r.count; })
+        .catch(function ()  { document.getElementById('uniqueCounter').textContent = '—'; });
+</script>
+```
+
+4. Save and refresh. First visit: both counters go up. Subsequent refreshes: only page views increase. Open in a different browser or incognito mode: unique visitors +1.
+
+> To test: F12 → Application → Local Storage → delete `viewer_visited` → refresh.
+
+---
+
+## Advanced: Comment System
+
+More complex than the counters, but the same principle — form submission → store in TinyWebDB → load on page load.
+
+### Steps
+
+1. Download [`comment.js`](comment.js) into your project folder
+
+2. Add a comment section to your page:
+
+```html
+<div class="comment-section">
+    <h2>Comments</h2>
+    <form class="comment-form" id="commentForm">
+        <input type="text" id="cmtName" placeholder="Name" maxlength="20" required>
+        <input type="email" id="cmtEmail" placeholder="Email (optional)" maxlength="60">
+        <textarea id="cmtContent" placeholder="Write something..." maxlength="500" required></textarea>
+        <button type="submit">Post</button>
+    </form>
+    <div class="comment-list" id="commentList">
+        <p>Loading...</p>
+    </div>
+</div>
+```
+
+3. Add the comment script before `</body>`:
+
+```html
+<script src="comment.js"></script>
+<script>
+    var cmtList = document.getElementById('commentList');
+
+    function formatTime(isoStr) {
+        var d = new Date(isoStr);
+        var pad = function (n) { return n < 10 ? '0' + n : n; };
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+            + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    }
+
+    function escapeHTML(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function renderComments(comments) {
+        if (!comments || comments.length === 0) {
+            cmtList.innerHTML = '<p>No comments yet. Be the first! 🛋️</p>';
+            return;
+        }
+        var html = '';
+        comments.forEach(function (c) {
+            html +=
+                '<div class="comment-item">' +
+                '<div class="comment-meta">' +
+                '<span>' + escapeHTML(c.name) +
+                (c.email ? ' · ' + escapeHTML(c.email) : '') + '</span>' +
+                '<span>' + formatTime(c.time) + '</span>' +
+                '</div>' +
+                '<div>' + escapeHTML(c.content) + '</div>' +
+                '</div>';
+        });
+        cmtList.innerHTML = html;
+    }
+
+    Viewer.loadComments().then(renderComments).catch(function () {
+        cmtList.innerHTML = '<p>Failed to load. Please refresh.</p>';
+    });
+
+    document.getElementById('commentForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var name = document.getElementById('cmtName').value.trim();
+        var email = document.getElementById('cmtEmail').value.trim();
+        var content = document.getElementById('cmtContent').value.trim();
+        if (!name || !content) return;
+
+        var btn = this.querySelector('button');
+        btn.textContent = 'Posting...';
+        btn.disabled = true;
+
+        Viewer.submitComment({ name: name, email: email, content: content }).then(function () {
+            document.getElementById('cmtContent').value = '';
+            btn.textContent = 'Posted ✓';
+            setTimeout(function () { btn.textContent = 'Post'; btn.disabled = false; }, 2000);
+            return Viewer.loadComments();
+        }).then(renderComments).catch(function () {
+            btn.textContent = 'Failed, retry';
+            btn.disabled = false;
+        });
+    });
+</script>
+```
+
+4. For styling, copy the `.comment-section` CSS from [`index.html`](index.html).
+
+> Each comment (name, email, content, timestamp) is stored as an individual tag in TinyWebDB. No backend required.
 
 ---
 
