@@ -1,4 +1,4 @@
-# Beginner's Tutorial: Add a Visit Counter to Your HTML Page
+# Viewer Beginner's Tutorial: Add a Visit Counter to Your HTML Page
 
 > ⬅ [Back to project README](README_en.md)
 
